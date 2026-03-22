@@ -97,29 +97,49 @@ export default function ChatBot() {
     { role: "assistant", content: "Hi! I'm SocioAssist — your campus event guide. Pick a question below and I’ll help." },
   ]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [typingIdx, setTypingIdx] = useState<number | null>(null);
+  const [displayedLen, setDisplayedLen] = useState(0);
 
   const pageQA = getPageQA(pathname);
   const allQA = [...pageQA, ...GLOBAL_QA];
   const quickQuestions = [...pageQA.slice(0, 4), ...GLOBAL_QA.slice(0, Math.max(0, 4 - pageQA.length))].map((qa) => qa.q);
 
-  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, displayedLen]);
   useEffect(() => {
-    setMessages([{ role: "assistant", content: "Hi! I'm SocioAssist — your campus event guide. Pick a question below and I’ll help." }]);
+    setMessages([{ role: "assistant", content: "Hi! I'm SocioAssist \u2014 your campus event guide. Pick a question below and I'll help." }]);
+    setTypingIdx(null);
+    setDisplayedLen(0);
   }, [pathname]);
+
+  /* Typewriter effect */
+  useEffect(() => {
+    if (typingIdx === null) return;
+    const msg = messages[typingIdx];
+    if (!msg) return;
+    const fullLen = msg.content.length;
+    if (displayedLen >= fullLen) { setTypingIdx(null); return; }
+    const id = setTimeout(() => setDisplayedLen((l: number) => Math.min(l + 1, fullLen)), 12);
+    return () => clearTimeout(id);
+  }, [typingIdx, displayedLen, messages]);
+
   const handleQuestion = (text: string) => {
-    if (!text.trim()) return;
+    if (!text.trim() || typingIdx !== null) return;
     setMessages((prev) => [...prev, { role: "user", content: text.trim() }]);
     const answer = findAnswer(text, allQA);
+    const reply = answer || "I'm not sure about that one yet. Try another question below, or visit the FAQ or Contact page for more help.";
     setTimeout(() => {
-      setMessages((prev) => [...prev, {
-        role: "assistant",
-        content: answer || "I'm not sure about that one yet. Try another question below, or visit the FAQ or Contact page for more help.",
-      }]);
+      setMessages((prev) => {
+        const next = [...prev, { role: "assistant" as const, content: reply }];
+        setTypingIdx(next.length - 1);
+        setDisplayedLen(0);
+        return next;
+      });
     }, 400);
   };
 
   const asked = messages.filter((m) => m.role === "user").map((m) => m.content);
   const remaining = quickQuestions.filter((q) => !asked.includes(q));
+  const isTyping = typingIdx !== null;
 
   return (
     <>
@@ -129,7 +149,7 @@ export default function ChatBot() {
 
       <div className="fixed bottom-6 right-6 z-50">
         {isOpen && (
-          <div className="mb-4 w-[360px] h-[520px] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden animate-in slide-in-from-bottom-4">
+          <div className="mb-4 w-[360px] max-w-[calc(100vw-3rem)] h-[520px] max-h-[calc(100dvh-6rem)] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden animate-in slide-in-from-bottom-4">
             {/* Header */}
             <div className="bg-[#154CB3] text-white px-4 py-3 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
@@ -152,23 +172,36 @@ export default function ChatBot() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 space-y-3">
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                  <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words overflow-hidden ${
                     msg.role === "user"
                       ? "bg-[#154CB3] text-white rounded-br-md"
                       : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-md"
                   }`}>
-                    {msg.content}
+                    {i === typingIdx ? msg.content.slice(0, displayedLen) : msg.content}
+                    {i === typingIdx && <span className="inline-block w-[2px] h-[14px] bg-gray-400 ml-0.5 align-middle animate-pulse" />}
                   </div>
                 </div>
               ))}
-              {remaining.length > 0 && (
+
+              {/* Typing indicator (before message arrives) */}
+              {messages.length > 0 && messages[messages.length - 1].role === "user" && typingIdx === null && (
+                <div className="flex justify-start">
+                  <div className="px-4 py-2.5 rounded-2xl rounded-bl-md bg-gray-100 dark:bg-gray-800 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+              )}
+
+              {remaining.length > 0 && !isTyping && (
                 <div className="flex flex-wrap gap-2 mt-2 justify-center">
                   {remaining.map((q) => (
                     <button key={q} onClick={() => handleQuestion(q)}
-                      className="text-xs px-3 py-1.5 rounded-full border border-[#154CB3]/30 text-[#154CB3] hover:bg-[#154CB3]/10 transition-colors cursor-pointer">
+                      className="text-xs px-3 py-1.5 rounded-full border border-[#154CB3]/30 text-[#154CB3] hover:bg-[#154CB3]/10 transition-colors cursor-pointer break-words max-w-full">
                       {q}
                     </button>
                   ))}

@@ -53,11 +53,19 @@ export default function TeamPage() {
     },
     {
       name: "Dr. Shruti Srinivasan",
-      role: "Head of Christ Incubation and Consultancy Foundation (CICF)",
+      role: "Head of CICF",
       department: "Department of Business Management",
       bio: "Leading Christ University's incubation initiatives and providing strategic guidance for startup development and business consultancy.",
       expertise: ["Business Strategy", "Startup Incubation", "Entrepreneurship", "Consultancy Management"],
       photo: "/faculty-shruti-srinivasan.jpg",
+    },
+    {
+      name: "Alwin Joseph",
+      role: "Technical Consultant",
+      department: "Christ University",
+      bio: "Providing technical consultation and industry expertise, helping SOCIO bridge the gap between academic projects and production-grade solutions.",
+      expertise: ["Technical Consulting", "Industry Mentorship", "Software Architecture", "Project Guidance"],
+      photo: "/faculty-alwin.jpg",
     },
   ];
 
@@ -365,7 +373,7 @@ export default function TeamPage() {
             </h3>
             <div className="mt-4 w-16 h-1 bg-[#FFCC00] mx-auto rounded-full" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {advisors.map((advisor, i) => (
               <div
                 key={i}

@@ -1,0 +1,20 @@
+# SOCIO – Campus Event Management Platform
+# https://socio.christuniversity.in
+
+User-agent: *
+Allow: /
+Disallow: /auth
+Disallow: /auth/*
+Disallow: /create/*
+Disallow: /edit/*
+Disallow: /manage
+Disallow: /masteradmin
+Disallow: /profile
+Disallow: /attendance
+Disallow: /error
+Disallow: /guide/*
+Disallow: /support/inbox
+Disallow: /api/*
+
+# Sitemap
+Sitemap: https://socio.christuniversity.in/sitemap.xml
