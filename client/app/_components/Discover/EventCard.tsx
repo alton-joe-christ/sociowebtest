@@ -48,7 +48,9 @@ export const EventCard = ({
   const displayTime = formatTime(time, "Time TBD");
 
   return (
-    <div className="bg-[#f9f9f9] rounded-lg overflow-hidden border-2 border-gray-200 transform transition duration-100 ease-in-out hover:scale-101 flex flex-col">
+    <div className="bg-[#f9f9f9] rounded-lg overflow-hidden border-2 border-gray-200 
+    transform transition-all duration-300 ease-in-out 
+    hover:scale-110 hover:shadow-lg flex flex-col">
       <Link href={eventPageUrl} className="w-full block">
         <div className="relative h-40 bg-white">
           {showOutsiderBadge && (

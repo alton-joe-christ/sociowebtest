@@ -14,7 +14,9 @@ export const SectionHeader = ({ title, link }: SectionHeaderProps) => {
       {title != "Browse by category" ? (
         <Link
           href={link}
-          className="text-[#063168] text-sm md:text-base font-semibold flex items-center"
+          className="relative text-[#063168] text-sm md:text-base font-semibold flex items-center 
+          after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-[#063168] 
+          after:transition-all after:duration-300 hover:after:w-full"
         >
           View all
           <svg
